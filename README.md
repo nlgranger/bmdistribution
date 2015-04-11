@@ -8,7 +8,7 @@ binary images for example.
 
 This library follows the matlab distribution class as closely as possible, and
 more precisely the [Gaussian mixture
-model](http://fr.mathworks.com/help/stats/gmdistribution-class.html) one.
+model](mathworks.com/help/stats/gmdistribution-class.html) one.
 
 ## Example
 
