@@ -13,8 +13,16 @@ model](mathworks.com/help/stats/gmdistribution-class.html) one.
 ## Example
 
 ```matlab
-bmm = fitbmdist(appData, k);
-bmm.pdf(valData)
+Xapp = [bsxfun(@lt, rand(40000, 9), [.1 .2 .3 .4 .5 .6 .7 .8 .9]);
+bsxfun(@lt, rand(10000, 9), [.9 .8 .7 .6 .5 .4 .3 .2 .1])];
+bmm = fitbmdist(Xapp, 2, 'Options', struct('MaxIter', 1000, 'TolFun', 1e-4))
+bmm.ComponentProportion
+bmm.Means
+
+Xval = [bsxfun(@lt, rand(1000, 9), [.1 .2 .3 .4 .5 .6 .7 .8 .9]);
+        bsxfun(@lt, rand(1000, 9), [.9 .8 .7 .6 .5 .4 .3 .2 .1])];
+clus = bmm.cluster(Xval);
+# label numbers might be inverted, check numbers and verify confusion matrix.
 ```
 
 ## Limitations

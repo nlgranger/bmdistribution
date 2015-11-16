@@ -105,7 +105,7 @@ classdef bmdistribution < handle
         %   cluster index of each point. The cluster index refers to the
         %   component giving the largest posterior probability for the
         %   point.
-            P = bsxfun(@times, this.posterior(X), this.ComponentProportion);
+            P = bsxfun(@times, this.posterior(X), this.ComponentProportion');
             [~, idx] = max(P, [], 2);
             idx = reshape(idx, length(idx), 1);
         end
@@ -126,26 +126,29 @@ classdef bmdistribution < handle
             if mod(length(varargin), 2) ~= 0
                 error('Incomplete Option/value pair');
             end
-            for i = 1:length(varargin)
+            i = 1;
+            while i <= length(varargin)
                 switch varargin{i}
                     case {'Margin'}
                         if isnumeric(varargin{i+1}) ...
                             && margin >= 0 && margin < 0.5
                             margin = varargin{i+1};
+                            i = i+2;
                         else
                             error('Invalid ''Margin'' value.');
                         end
-                        i = i+1;
                     case {'Start'}
                         if ischar(varargin{i+1})
                             startMethod = varargin{i+1};
+                            i = i+2;
                         else
                             error('Invalid ''Start'' method.');
                         end
                     case {'Options'}
                         opts  = varargin{i+1};
                         maxIt = opts.MaxIter;
-                        thres = TolFun;
+                        thres = opts.TolFun;
+                        i = i+2;
                     otherwise
                         error('Unknown ''varargin{i}'' option.');
                 end
@@ -181,8 +184,11 @@ classdef bmdistribution < handle
                 Z = bsxfun(@times, postProb, P);
                 % Fix cancellation issues
                 cancelled = sum(Z,2) < 10^-300;
-                if firstCancelWarning && any(cancelled)
-                    warning('Skipping samples with probability 0.');
+                if any(cancelled)
+                    if firstCancelWarning
+                        warning('Skipping samples with probability 0.');
+                        firstCancelWarning = false;
+                    end
                     Z = Z(~cancelled, :);
                 end
                 Z = bsxfun(@rdivide, Z, sum(Z,2));
@@ -196,13 +202,15 @@ classdef bmdistribution < handle
 
                 % Stop or continue iterations
                 if mod(it, 10) == 0
-                    if 1 - this.pdf(X) < thres
-                        converged = true;
+                    obj = bmdistribution(T, P);
+                    if 1 - obj.pdf(X) < thres
+                        return
                     end
                 end
                 it = it + 1;
             end
 
+            warning('Returned before convergence.')
             obj = bmdistribution(T, P);
             obj.NumIterations = it;
         end % function fit(X, K, varargin)
