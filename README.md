@@ -22,7 +22,7 @@ bmm.Means
 Xval = [bsxfun(@lt, rand(1000, 9), [.1 .2 .3 .4 .5 .6 .7 .8 .9]);
         bsxfun(@lt, rand(1000, 9), [.9 .8 .7 .6 .5 .4 .3 .2 .1])];
 clus = bmm.cluster(Xval);
-# label numbers might be inverted, check numbers and verify confusion matrix.
+% label numbers might be inverted, check numbers and verify confusion matrix.
 ```
 
 ## Limitations
